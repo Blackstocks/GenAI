@@ -1,0 +1,45 @@
+{
+    "name": "Learning GenAI",
+    "dockerComposeFile": "docker-compose.yaml",
+    "service": "app",
+    "workspaceFolder": "/workspace/${localWorkspaceFolderBasename}",
+    "remoteUser": "root",
+  
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "ms-python.python",
+          "ms-python.black-formatter",
+          "ms-toolsai.jupyter",
+          "esbenp.prettier-vscode",              // Formatter
+          "njpwerner.autodocstring",             // Python docstring generator
+          "kevinrose.vsc-python-indent",         // Fixes Python indentation
+          "usernamehw.errorlens",                // Highlights errors inline
+          "visualstudioexptteam.vscodeintellicode", // AI-assisted suggestions
+          "GitHub.copilot",                      // GitHub Copilot (AI pair programmer)
+          "GitHub.copilot-chat",                 // GitHub Copilot Chat
+          "eamodio.gitlens",                     // Git history + blame
+          "ms-azuretools.vscode-docker",         // Docker support
+          "ms-toolsai.jupyter-keymap",           // Jupyter keyboard shortcuts
+          "ms-toolsai.jupyter-renderers",        // Rich Jupyter outputs
+          "mhutchie.git-graph",                  // Git graph visualization
+          "batisteo.vscode-django",              // If you're using Django
+          "ms-vsliveshare.vsliveshare"           // Live Share for collaboration
+        ]
+      }
+    },
+  
+    "settings": {
+      "python.pythonPath": "/usr/local/bin/python",
+      "python.linting.enabled": true,
+      "python.linting.pylintEnabled": true,
+      "python.autoComplete.addBrackets": true,
+      "editor.defaultFormatter": "ms-python.black-formatter",
+      "editor.formatOnSave": true,
+      "files.trimTrailingWhitespace": true,
+      "files.insertFinalNewline": true,
+      "files.autoSave": "onWindowChange",
+      "terminal.integrated.inheritEnv": false
+    }
+  }
+  

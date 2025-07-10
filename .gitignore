@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# VS Code / Dev Containers
+.vscode/
+.devcontainer/
+
+# Logs
+*.log
+
+# OS junk
+.DS_Store
