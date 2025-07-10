@@ -22,3 +22,7 @@ ENV PATH="/root/.local/bin:$PATH"
 # COPY pyproject.toml poetry.lock ./
 # RUN poetry install --no-root
 
+# Install Node.js and npm (LTS version)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
