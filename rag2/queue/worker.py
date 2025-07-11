@@ -6,6 +6,7 @@ from openai import OpenAI
 
 
 def process_query(query: str):
+
     print("Searching chunk", query)
 
     # ✅ Load embedding model and vector store dynamically every time

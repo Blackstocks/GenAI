@@ -13,7 +13,7 @@ from qdrant_client import QdrantClient
 
 def run_indexing(pdf_path: str = "./rag2/rag2.pdf"):
     """Indexes the specified PDF into Qdrant vector store."""
-    load_dotenv()
+    load_dotenv(override=True)
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise ValueError("❌ OPENAI_API_KEY not set in environment!")
