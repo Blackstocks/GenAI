@@ -4,7 +4,7 @@ import os
 import subprocess
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 import uvicorn
 from .server import app
 from . import index
@@ -34,7 +34,7 @@ def start_rq_worker():
 
 def main():
     # Load environment
-    load_dotenv()
+    load_dotenv(override=True)
 
     # 1. Start background worker
     start_rq_worker()
