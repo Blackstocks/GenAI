@@ -28,15 +28,21 @@ class State(TypedDict):
 
 # Define the chatbot node
 def chat_bot(state: State) -> State:
+    print("Query is inside the node")
     query = state["query"]
+    print("Query is updated in the local query variable")
     llm_response = client.chat.completions.create(
         model="gpt-3.5-turbo",  # Use gpt-4 or gpt-4o if you have access
         messages=[
             {"role": "user", "content": query},
         ],
     )
+    print("------> LLM model called")
     result = llm_response.choices[0].message.content
+    print("Result got from the llm")
     state["llm_result"] = result
+    print("updating the llm_result to our initial state")
+    print("returning the state")
     return state
 
 
@@ -54,6 +60,7 @@ graph = graph_builder.compile()
 def main():
     user = input("> ")
     _state: State = {"query": user, "llm_result": None}
+    print("User state updated")
     graph_result = graph.invoke(_state)
     print("\n🧠 Response from graph:\n", graph_result["llm_result"])
 
