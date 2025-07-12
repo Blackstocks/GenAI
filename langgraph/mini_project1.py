@@ -35,26 +35,29 @@ class State(TypedDict):
 def classify_message(state: State):
     query = state["user_query"]
     SYSTEM_PROMPT = """
-    You are an helpful AI agent. Your job is to detect if the user's query is related to coding or cooking or general.
+    You are a helpful AI agent. Your job is to detect if the user's query is related to coding or cooking or general.
     Return your response as a JSON like this: {"query_type": "cooking"}
-
     """
-    response = client.chat.completions.parse(
-        model="gpt-4.1-nano",
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": query},
         ],
+        response_format={"type": "json_object"},
     )
-    state["query_type"] = response.choices[0].message.parsed.query_type
+    import json
+
+    parsed_response = json.loads(response.choices[0].message.content)
+    state["query_type"] = parsed_response["query_type"]
     return state
 
 
 def general(state: State):
     query = state["user_query"]
-    SYSTEM_PROMPT = "Answer the user’s general query clearly and concisely."
+    SYSTEM_PROMPT = "Answer the user's general query clearly and concisely."
     response = client.chat.completions.create(
-        model="gpt-4.1-nano",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": query},
@@ -70,7 +73,7 @@ def coding(state: State):
         "You are a programming expert. Help the user solve the code problem."
     )
     response = client.chat.completions.create(
-        model="gpt-4.1-nano",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": query},
@@ -80,11 +83,11 @@ def coding(state: State):
     return state
 
 
-def Cooking(state: State):
+def cooking(state: State):
     query = state["user_query"]
-    SYSTEM_PROMPT = "You are a helpful cooking agent. Answer recipie or food questions."
+    SYSTEM_PROMPT = "You are a helpful cooking agent. Answer recipe or food questions."
     response = client.chat.completions.create(
-        model="gpt-4.1-nano",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": query},
@@ -94,8 +97,10 @@ def Cooking(state: State):
     return state
 
 
-def route_query(state: State) -> Literal["general", "coding", "Cooking"]:
-    return f"{state['query_type']}_query"
+def route_query(
+    state: State,
+) -> Literal["general", "coding", "cooking"]:
+    return state["query_type"]
 
 
 def code_validator(state: State):
@@ -106,12 +111,16 @@ def code_validator(state: State):
     Query: {state['user_query']}
     Code: {state['llm_result']}
     """
-    response = client.chat.completions.parse(
-        model="gpt-4.1-nano",
-        response_format=CodeAccuracyResponse,
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
         messages=[{"role": "system", "content": SYSTEM_PROMPT}],
+        response_format={"type": "json_object"},
     )
-    state["accuracy"] = response.choices[0].message.parsed.accuracy
+
+    import json
+
+    parsed_response = json.loads(response.choices[0].message.content)
+    state["accuracy"] = parsed_response["accuracy"]
     return state
 
 
@@ -123,44 +132,48 @@ def check_code(state: State) -> Literal["coding", "__end__"]:
     return "coding" if accuracy < 80 else "__end__"
 
 
-def recipie_quantified(state: State):
+def recipe_quantified(state: State):
     SYSTEM_PROMPT = f"""
     Convert the following cooking instructions into quantified recipe.
     Return JSON: {{ "quantify": "2 cups rice, 1 tsp salt, etc." }}
 
     Recipe: {state['llm_result']}
     """
-    response = client.chat.completions.parse(
-        model="gpt-4.1-nano",
-        response_format=RecipeQuantityResponse,
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
         messages=[{"role": "system", "content": SYSTEM_PROMPT}],
+        response_format={"type": "json_object"},
     )
-    state["quantify"] = response.choices[0].message.parsed.quantify
+
+    import json
+
+    parsed_response = json.loads(response.choices[0].message.content)
+    state["quantify"] = parsed_response["quantify"]
     return state
 
 
-def recipie_quantity(state: State) -> Literal["Cooking", "__end__"]:
-    return "__end__" if state.get("quantify") else "Cooking"
+def recipe_quantity(
+    state: State,
+) -> Literal["cooking", "__end__"]:
+    return "__end__" if state.get("quantify") else "cooking"
 
 
 graph_builder = StateGraph(State)
 graph_builder.add_node("classify_message", classify_message)
 graph_builder.add_node("general", general)
 graph_builder.add_node("coding", coding)
-graph_builder.add_node("Cooking", Cooking)
-graph_builder.add_node("route_query", route_query)
+graph_builder.add_node("cooking", cooking)
 graph_builder.add_node("code_validator", code_validator)
-graph_builder.add_node("check_code", check_code)
-graph_builder.add_node("recipie_quantified", recipie_quantified)
-graph_builder.add_node("recipie_quantity", recipie_quantity)
+graph_builder.add_node("recipe_quantified", recipe_quantified)
+
 
 graph_builder.add_edge(START, "classify_message")
 graph_builder.add_conditional_edges("classify_message", route_query)
 graph_builder.add_edge("general", END)
 graph_builder.add_edge("coding", "code_validator")
 graph_builder.add_conditional_edges("code_validator", check_code)
-graph_builder.add_edge("Cooking", "recipie_quantified")
-graph_builder.add_conditional_edges("recipie_quantified", recipie_quantity)
+graph_builder.add_edge("cooking", "recipe_quantified")
+graph_builder.add_conditional_edges("recipe_quantified", recipe_quantity)
 
 graph = graph_builder.compile()
 
@@ -175,10 +188,11 @@ def main():
         "query_type": None,
     }
     graph_result = graph.invoke(_state)
-    print(
-        "\n🧠 Response from graph:\n",
-        graph_result.get("llm_result", "accuracy", "quantify", "query_type"),
-    )
+    print("\n🧠 Response from graph:")
+    print(f"Result: {graph_result.get('llm_result', 'No result')}")
+    print(f"Accuracy: {graph_result.get('accuracy', 'N/A')}")
+    print(f"Quantify: {graph_result.get('quantify', 'N/A')}")
+    print(f"Query Type: {graph_result.get('query_type', 'N/A')}")
 
 
 if __name__ == "__main__":
