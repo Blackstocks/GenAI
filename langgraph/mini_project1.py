@@ -73,7 +73,7 @@ def coding(state: State):
         "You are a programming expert. Help the user solve the code problem."
     )
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": query},
@@ -97,9 +97,7 @@ def cooking(state: State):
     return state
 
 
-def route_query(
-    state: State,
-) -> Literal["general", "coding", "cooking"]:
+def route_query(state: State) -> Literal["general", "coding", "cooking"]:
     return state["query_type"]
 
 
@@ -152,9 +150,7 @@ def recipe_quantified(state: State):
     return state
 
 
-def recipe_quantity(
-    state: State,
-) -> Literal["cooking", "__end__"]:
+def recipe_quantity(state: State) -> Literal["cooking", "__end__"]:
     return "__end__" if state.get("quantify") else "cooking"
 
 

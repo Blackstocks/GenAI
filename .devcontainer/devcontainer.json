@@ -4,7 +4,12 @@
     "service": "app",
     "workspaceFolder": "/workspace/${localWorkspaceFolderBasename}",
     "remoteUser": "root",
-  
+    "runServices": [
+      "app",
+      "valkey",
+      "vector-db",
+      "mongodb"
+    ],
     "customizations": {
       "vscode": {
         "extensions": [
