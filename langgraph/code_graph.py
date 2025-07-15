@@ -162,9 +162,12 @@ def main():
         "accuracy_percentage": None,
         "is_coding_question": None,
     }
-    graph_result = graph.invoke(_state)
-    # print("\n🧠 Response from graph:\n", graph_result["llm_result"])
-    print(graph_result)
+
+    for event in graph.stream(_state):  # -----> streaming response of each node
+        print("Event", event)
+    # graph_result = graph.invoke(_state)
+    # # print("\n🧠 Response from graph:\n", graph_result["llm_result"])
+    # print(graph_result)
 
 
 if __name__ == "__main__":
