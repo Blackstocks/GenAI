@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .venv/
 .env
+**/.env
 
 # VS Code / Dev Containers
 .vscode/
@@ -13,4 +14,5 @@ __pycache__/
 
 # OS junk
 .DS_Store
+.env
 .env
